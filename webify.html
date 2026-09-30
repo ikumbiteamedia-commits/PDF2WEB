@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>PDF2WEB — Webify</title>
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e6b3a'/%3E%3Cpath d='M22 14h14l8 8v26a2 2 0 0 1-2 2H22a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2Z' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M36 14v8h8' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='13' font-weight='bold' fill='%23fff'%3EPDF%3C/text%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/webify.css">
+</head>
+<body class="webify-page">
+
+<!-- ================= HEADER ================= -->
+<header class="app" id="pageHeader">
+    <div class="logo" style="cursor:pointer;" onclick="location.href='app.html'">
+        <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
+        <div class="logo-text">
+            <span class="brand">PDF2WEB</span>
+            <small>WEBIFY</small>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="controls">
+            <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Dashboard</span></a>
+        </div>
+    </div>
+</header>
+
+<!-- ================= MAIN SHELL ================= -->
+<main class="webify-shell" id="mainShell">
+
+    <!-- ======================================================
+         STATE 1: LANDING — document picker + drafts + published
+         ====================================================== -->
+    <section id="webifyLanding">
+
+        <div class="webify-hero">
+            <div class="webify-hero-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h1>Turn a PDF into a website</h1>
+            <p>Pick one of your documents. We'll analyze it, generate a site, and let you edit everything before publishing.</p>
+        </div>
+
+        <!-- Your documents -->
+        <div class="wf-section-heading">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Your documents</span>
+        </div>
+        <div class="webify-doc-picker" id="webifyDocPicker">
+            <p class="meta" style="grid-column:1/-1;text-align:center">Loading your documents…</p>
+        </div>
+
+        <!-- Drafts -->
+        <div class="wf-section-heading">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Drafts</span>
+            <span class="count" id="draftsCount">0</span>
+        </div>
+        <div class="wf-sites-grid" id="draftsGrid">
+            <div class="wf-empty" style="grid-column:1/-1">
+                <i class="fa-solid fa-inbox"></i>
+                <b>No drafts yet</b>
+                Pick a document above to start a new site.
+            </div>
+        </div>
+
+        <!-- Published -->
+        <div class="wf-section-heading">
+            <i class="fa-solid fa-globe"></i>
+            <span>Published</span>
+            <span class="count" id="publishedCount">0</span>
+        </div>
+        <div class="wf-sites-grid" id="publishedGrid">
+            <div class="wf-empty" style="grid-column:1/-1">
+                <i class="fa-solid fa-rocket"></i>
+                <b>Nothing published yet</b>
+                Publish a draft to make it live.
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================
+         STATE 2: EDITOR
+         ====================================================== -->
+    <section id="webifyEditor" class="hidden">
+
+        <!-- Editor top bar -->
+        <div class="wf-editor-topbar">
+            <button class="btn back" id="editorExit">
+                <i class="fa-solid fa-arrow-left"></i> Exit
+            </button>
+            <span class="title" id="editorTitle">Untitled</span>
+            <span class="status" id="editorStatus">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Saved</span>
+            </span>
+            <div class="actions">
+                <button class="btn" id="editorPreviewBtn">
+                    <i class="fa-solid fa-eye"></i> Preview
+                </button>
+                <button class="btn" id="editorSaveBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> Save
+                </button>
+                <button class="btn primary" id="editorPublishBtn">
+                    <i class="fa-solid fa-rocket"></i> Publish
+                </button>
+            </div>
+        </div>
+
+        <!-- 3-column editor grid -->
+        <div class="wf-editor-grid" id="editorGrid">
+
+            <!-- LEFT RAIL -->
+            <aside class="wf-panel-left">
+
+                <!-- Colors -->
+                <div class="wf-panel-block">
+                    <h4><i class="fa-solid fa-palette"></i> Colors</h4>
+                    <div class="wf-color-row">
+                        <label for="colorPrimary">Primary</label>
+                        <input type="color" id="colorPrimary" value="#1e6b3a">
+                    </div>
+                    <div class="wf-color-row">
+                        <label for="colorBg">Background</label>
+                        <input type="color" id="colorBg" value="#f4f9f6">
+                    </div>
+                    <div class="wf-color-row">
+                        <label for="colorText">Text</label>
+                        <input type="color" id="colorText" value="#16211c">
+                    </div>
+                    <div class="row-2" style="margin-top:10px">
+                        <button class="btn half" id="colorsResetBtn">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sections list -->
+                <div class="wf-panel-block">
+                    <h4><i class="fa-solid fa-list-ul"></i> Sections <span class="count" id="secCount">0</span></h4>
+                    <div class="wf-sec-list" id="sectionList"></div>
+                    <div class="row-2" style="margin-top:10px">
+                        <button class="btn half" id="addSectionBtn">
+                            <i class="fa-solid fa-plus"></i> Add section
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Page settings -->
+                <div class="wf-panel-block">
+                    <h4><i class="fa-solid fa-gear"></i> Page</h4>
+                    <label class="wf-field-label" for="pageTitle">Title</label>
+                    <input class="field" id="pageTitle" type="text" placeholder="Site title">
+
+                    <label class="wf-field-label" for="pageHero">Hero / subtitle</label>
+                    <textarea class="field" id="pageHero" rows="2" placeholder="Short description"></textarea>
+
+                    <label class="wf-field-label" for="pageSlug">Slug</label>
+                    <input class="field" id="pageSlug" type="text" placeholder="my-website">
+                </div>
+
+            </aside>
+
+            <!-- CENTER CANVAS -->
+            <div class="wf-canvas-wrap">
+                <div class="wf-canvas-chrome">
+                    <span class="dot"></span>
+                    <span class="label">Live editor</span>
+                    <span class="tip"><i class="fa-solid fa-hand-pointer"></i> Click any text to edit · click a section to select</span>
+                </div>
+                <div class="wf-canvas" id="canvas"></div>
+                <div class="wf-canvas-fab">
+                    <button id="fabAddSection" title="Add section">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button id="fabAddImage" title="Add image">
+                        <i class="fa-solid fa-image"></i>
+                    </button>
+                    <button id="fabColors" title="Colors">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT CONTEXT PANEL -->
+            <aside class="wf-panel-right" id="ctxPanel">
+                <div class="wf-panel-block">
+                    <h4><i class="fa-solid fa-info-circle"></i> Nothing selected</h4>
+                    <p class="meta" style="font-size:12.5px;color:var(--text-soft);margin:0">
+                        Click a section on the canvas to edit its details here.
+                    </p>
+                </div>
+            </aside>
+
+        </div>
+    </section>
+
+</main>
+
+<!-- ============================================================
+     FLOATING TEXT TOOLBAR
+     ============================================================ -->
+<div class="wf-toolbar" id="textToolbar">
+    <button data-cmd="bold" title="Bold"><i class="fa-solid fa-bold"></i></button>
+    <button data-cmd="italic" title="Italic"><i class="fa-solid fa-italic"></i></button>
+    <button data-cmd="underline" title="Underline"><i class="fa-solid fa-underline"></i></button>
+    <span class="sep"></span>
+    <button data-cmd="h2" title="Heading 2">H2</button>
+    <button data-cmd="h3" title="Heading 3">H3</button>
+    <button data-cmd="p" title="Paragraph">¶</button>
+    <span class="sep"></span>
+    <button data-cmd="link" title="Add link"><i class="fa-solid fa-link"></i></button>
+    <button data-cmd="image" title="Insert image"><i class="fa-solid fa-image"></i></button>
+    <button data-cmd="clear" title="Clear formatting"><i class="fa-solid fa-eraser"></i></button>
+</div>
+
+<!-- ============================================================
+     IMAGE UPLOAD MODAL
+     ============================================================ -->
+<div class="wf-modal-backdrop" id="imgModal">
+    <div class="wf-modal">
+        <h3>Add an image</h3>
+        <p class="sub">Upload a JPG, PNG, or WebP. It will be stored with your site.</p>
+
+        <div class="wf-img-drop" id="imgDropZone">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <div><b>Click to choose</b> or drag an image here</div>
+            <input type="file" id="imgFileInput" accept="image/*" style="display:none">
+        </div>
+
+        <div id="imgPreviewWrap" style="display:none;margin-top:14px">
+            <img id="imgPreview" alt="" style="max-width:100%;border-radius:10px;border:1px solid var(--border)">
+        </div>
+
+        <label class="wf-field-label" for="imgAlt">Alt text (optional)</label>
+        <input class="field" id="imgAlt" type="text" placeholder="Describe the image">
+
+        <div class="row">
+            <button class="btn" id="imgCancelBtn">Cancel</button>
+            <button class="btn primary" id="imgInsertBtn" disabled>
+                <i class="fa-solid fa-check"></i> Insert image
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     LINK MODAL
+     ============================================================ -->
+<div class="wf-modal-backdrop" id="linkModal">
+    <div class="wf-modal">
+        <h3>Add a link</h3>
+        <p class="sub">Link the selected text to a URL.</p>
+
+        <label class="wf-field-label" for="linkUrl">URL</label>
+        <input class="field" id="linkUrl" type="url" placeholder="https://example.com">
+
+        <label class="wf-field-label" for="linkText">Link text</label>
+        <input class="field" id="linkText" type="text" placeholder="Click here">
+
+        <div class="row">
+            <button class="btn" id="linkCancelBtn">Cancel</button>
+            <button class="btn primary" id="linkInsertBtn">
+                <i class="fa-solid fa-check"></i> Insert link
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SECTION PICKER
+     ============================================================ -->
+<div class="wf-modal-backdrop" id="sectionModal">
+    <div class="wf-modal" style="max-width:600px">
+        <h3>Add a section</h3>
+        <p class="sub">Pick a starting layout. You can edit the text and add images after.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="wf-doc-card" data-new-section="text">
+                <div class="wf-doc-card-icon"><i class="fa-solid fa-align-left"></i></div>
+                <b>Text section</b>
+                <p class="meta">Heading + body text</p>
+            </button>
+            <button class="wf-doc-card" data-new-section="image">
+                <div class="wf-doc-card-icon"><i class="fa-solid fa-image"></i></div>
+                <b>Image section</b>
+                <p class="meta">Heading + image + caption</p>
+            </button>
+            <button class="wf-doc-card" data-new-section="two-col">
+                <div class="wf-doc-card-icon"><i class="fa-solid fa-columns"></i></div>
+                <b>Two columns</b>
+                <p class="meta">Image next to text</p>
+            </button>
+            <button class="wf-doc-card" data-new-section="quote">
+                <div class="wf-doc-card-icon"><i class="fa-solid fa-quote-left"></i></div>
+                <b>Quote</b>
+                <p class="meta">Pull quote with attribution</p>
+            </button>
+        </div>
+        <div class="row">
+            <button class="btn" id="sectionCancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     FULL-SCREEN PREVIEW SHELL
+     ============================================================ -->
+<div class="wf-preview-shell hidden" id="previewShell">
+    <div class="top">
+        <span class="label"><i class="fa-solid fa-eye" style="color:var(--primary)"></i> Preview</span>
+        <div class="actions">
+            <button class="btn" id="previewCloseBtn">
+                <i class="fa-solid fa-xmark"></i> Close
+            </button>
+            <button class="btn primary" id="previewPublishBtn">
+                <i class="fa-solid fa-rocket"></i> Publish
+            </button>
+        </div>
+    </div>
+    <iframe id="previewFrame" title="Preview"></iframe>
+</div>
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+<div class="wf-toast" id="toast"></div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/webify.js"></script>
+
+</body>
+</html>

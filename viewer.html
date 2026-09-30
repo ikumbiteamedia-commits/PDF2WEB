@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>PDF2WEB — Reader</title>
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e6b3a'/%3E%3Cpath d='M22 14h14l8 8v26a2 2 0 0 1-2 2H22a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2Z' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M36 14v8h8' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='13' font-weight='bold' fill='%23fff'%3EPDF%3C/text%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="app">
+    <div class="logo" style="cursor:pointer;" onclick="location.href='app.html'">
+        <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
+        <div class="logo-text">
+            <span class="brand">PDF2WEB</span>
+            <small>READER</small>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="controls">
+            <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Library</span></a>
+        </div>
+    </div>
+
+    <button class="iconbtn mobile-only" id="menuBtn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+</header>
+
+<!-- ================= DRAWER ================= -->
+<div class="backdrop hidden" id="backdrop"></div>
+<div class="drawer" id="drawer">
+    <div class="drawer-head">
+        <div class="drawer-brand">
+            <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
+            <b>PDF2WEB</b>
+        </div>
+        <button class="iconbtn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <nav>
+        <a href="app.html"><i class="fa-solid fa-arrow-left"></i> Back to Library</a>
+    </nav>
+</div>
+
+<!-- ================= VIEWER SHELL ================= -->
+<div class="viewer-shell">
+
+    <!-- TOP BAR -->
+    <div class="viewer-topbar">
+        <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Library</span></a>
+
+        <b id="viewerTitle" class="viewer-title">Loading…</b>
+
+        <div class="viewer-searchbar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="viewerSearch" placeholder="Search in this PDF or jump to page…">
+            <button class="btn icon-only" id="clearSearch" title="Clear" style="display:none">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="viewer-pageinfo">
+            Page <input id="pageNum" type="number" min="1" style="width:60px"> / <span id="pageTotal">—</span>
+        </div>
+    </div>
+
+    <!-- MAIN BODY: SIDEBAR + MAIN AREA -->
+    <div class="viewer-body">
+
+        <!-- ============ LEFT SIDEBAR ============ -->
+        <aside class="viewer-side">
+
+            <!-- ACTIONS -->
+            <div class="side-block">
+                <h4><i class="fa-solid fa-bolt"></i> Actions</h4>
+                <div class="action-stack">
+                    <button class="btn primary" id="addBm">
+                        <i class="fa-regular fa-bookmark"></i> Bookmark this page
+                    </button>
+                    <button class="btn" id="shareView">
+                        <i class="fa-solid fa-share-nodes"></i> Share this page
+                    </button>
+                    <button class="btn" id="wfyBtn">
+                        <i class="fa-solid fa-code"></i> Webify this PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- READER AID -->
+            <div class="side-block">
+                <h4><i class="fa-solid fa-universal-access"></i> Reader aid</h4>
+
+                <div class="raid-row">
+                    <span>Zoom</span>
+                    <div class="raid-btns">
+                        <button id="rZoomDown" title="Zoom out"><i class="fa-solid fa-minus"></i></button>
+                        <button id="rZoomUp" title="Zoom in"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="raid-row">
+                    <span>Text size</span>
+                    <div class="raid-btns">
+                        <button id="rTextDown" title="Smaller text">A−</button>
+                        <button id="rTextUp" title="Bigger text">A+</button>
+                    </div>
+                </div>
+
+                <div class="raid-row" style="flex-direction:column;align-items:stretch;gap:6px">
+                    <span>Contrast</span>
+                    <div class="raid-btns" style="width:100%;display:flex;gap:4px">
+                        <button data-contrast="normal" class="active" style="flex:1" title="Normal"><i class="fa-solid fa-circle"></i></button>
+                        <button data-contrast="dark" style="flex:1" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                        <button data-contrast="high" style="flex:1" title="High contrast"><i class="fa-solid fa-circle-half-stroke"></i></button>
+                        <button data-contrast="sepia" style="flex:1" title="Sepia"><i class="fa-solid fa-mug-saucer"></i></button>
+                    </div>
+                </div>
+
+                <button class="btn outline side-reset" id="rReset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="side-block">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History</h4>
+                <div class="side-list" id="historyList">
+                    <p class="side-empty">No history yet.</p>
+                </div>
+            </div>
+
+            <!-- BOOKMARKS -->
+            <div class="side-block">
+                <h4><i class="fa-solid fa-bookmark"></i> Bookmarks <span class="side-count" id="bmCount">0</span></h4>
+                <div class="side-list" id="bmList">
+                    <p class="side-empty">No bookmarks yet.</p>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ============ MAIN AREA ============ -->
+        <div class="viewer-main">
+
+            <!-- PDF VIEW (default) -->
+            <div id="pdfView" class="viewer-view">
+                <div class="book" id="bookFace">
+                    <p class="meta" style="padding:60px 0;text-align:center">Loading your PDF…</p>
+                </div>
+            </div>
+
+            <!-- RESULTS VIEW (shown when searching) -->
+            <div id="resultsView" class="viewer-view hidden">
+                <div class="results-bar">
+                    <div class="results-title">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span id="resultsSummary">Searching…</span>
+                    </div>
+                    <button class="btn" id="backToPdfBtn"><i class="fa-solid fa-arrow-left"></i> Back to PDF</button>
+                </div>
+
+                <div id="didYouMean" class="did-you-mean hidden"></div>
+
+                <div id="resultsGrid" class="results-grid"></div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div class="modal hidden" id="shareModal">
+    <div class="box">
+        <h2>Share this page</h2>
+        <div id="shareBtns"></div>
+        <button class="btn social" id="shareClose">Close</button>
+    </div>
+</div>
+
+<!-- ================= WEBIFY PREMIUM GATE ================= -->
+<div class="modal hidden" id="webifyGateModal">
+    <div class="box" style="text-align:center">
+        <div class="gate-crown" style="font-size:38px;color:var(--accent);margin-bottom:8px">
+            <i class="fa-solid fa-crown"></i>
+        </div>
+        <h2 style="color:var(--primary-dark)">Webify this PDF</h2>
+        <p class="meta" style="margin:0 0 18px">
+            Turn this document into a beautiful, searchable website automatically.
+        </p>
+        <a class="btn primary" id="webifyGateUpgrade" href="#" style="width:100%;justify-content:center">
+            <i class="fa-solid fa-crown"></i> Unlock Webify
+        </a>
+        <button class="btn social" id="webifyGateClose" style="margin-top:8px">Not now</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/viewer.js"></script>
+
+</body>
+</html>

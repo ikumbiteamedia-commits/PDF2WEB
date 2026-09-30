@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>PDF2WEB — PDF Tools</title>
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e6b3a'/%3E%3Cpath d='M22 14h14l8 8v26a2 2 0 0 1-2 2H22a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2Z' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M36 14v8h8' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='13' font-weight='bold' fill='%23fff'%3EPDF%3C/text%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/tools.css">
+</head>
+<body class="tools-page">
+
+<!-- ================= HEADER ================= -->
+<header class="app">
+    <div class="logo" style="cursor:pointer;" onclick="location.href='app.html'">
+        <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
+        <div class="logo-text">
+            <span class="brand">PDF2WEB</span>
+            <small>PDF TOOLS</small>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="controls">
+            <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Dashboard</span></a>
+        </div>
+    </div>
+</header>
+
+<!-- ================= SHELL ================= -->
+<div class="tools-shell">
+
+    <!-- LEFT: tools list -->
+    <aside class="tools-nav" id="toolsNav">
+        <h4><i class="fa-solid fa-toolbox"></i> PDF Tools</h4>
+        <div id="toolsNavList"></div>
+    </aside>
+
+    <!-- RIGHT: workspace -->
+    <main class="tools-main">
+
+        <!-- Landing: tool grid -->
+        <section id="toolsLanding" class="tools-landing">
+            <h1>What would you like to do?</h1>
+            <p class="meta">Pick a tool. Everything runs on your device unless it's a server conversion.</p>
+            <div class="tools-grid" id="toolsGrid"></div>
+        </section>
+
+        <!-- Workspace: dynamically rendered per tool -->
+        <section id="toolsWorkspace" class="tools-workspace hidden"></section>
+
+    </main>
+
+</div>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" id="toast"></div>
+
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/tools/index.js"></script>
+
+</body>
+</html>

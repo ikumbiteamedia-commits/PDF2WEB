@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function me(u) {
+      return request.auth != null && request.auth.uid == u;
+    }
+
+    // ------------------------------------------------------------
+    // USERS + SUBCOLLECTIONS
+    // ------------------------------------------------------------
+    match /users/{u} {
+      allow read: if me(u);
+
+      allow create: if me(u)
+        && request.resource.data.plan == 'free'
+        && request.resource.data.uploadCount == 0
+        && request.resource.data.subscriptionStatus == 'none';
+
+      allow update: if me(u)
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'lastLoginAt','uploadCount','displayName','photoURL','currency','country',
+              'plan','subscriptionStatus','subscriptionPlan','subscriptionStartedAt',
+              'subscriptionExpiresAt','paymentProvider','lastTransactionAt'
+            ])
+        && (
+          !('uploadCount' in request.resource.data.diff(resource.data).affectedKeys())
+          || (
+            request.resource.data.uploadCount == resource.data.uploadCount + 1
+            && (resource.data.plan == 'premium' || resource.data.uploadCount < 2)
+          )
+        );
+
+      // ---- DOCUMENTS (library) ----
+      match /documents/{d} {
+        allow read: if me(u);
+        allow delete: if me(u);
+        allow create: if me(u) && (
+          get(/databases/$(db)/documents/users/$(u)).data.plan == 'premium'
+          || get(/databases/$(db)/documents/users/$(u)).data.uploadCount < 2
+        );
+        // Client can update its own doc (e.g. rename). Server updates use admin SDK.
+        allow update: if me(u);
+
+        // ---- Pages subcollection ----
+        match /pages/{p} {
+          allow read: if me(u);
+          allow write: if me(u);
+        }
+      }
+
+      // ---- WEBSITES (webified sites) ----
+      match /websites/{w} {
+        allow read: if me(u);
+        allow create: if me(u);
+        allow update: if me(u);
+        allow delete: if me(u);
+
+        // ---- Assets subcollection (image uploads from the editor) ----
+        match /assets/{a} {
+          allow read: if me(u);
+          allow write: if me(u);
+        }
+      }
+
+      // ---- CONVERSIONS ----
+      match /conversions/{c} {
+        allow read: if me(u);
+        allow create: if me(u)
+          && request.resource.data.status == 'queued'
+          && request.resource.data.keys()
+              .hasOnly(['tool','inputPath','name','status','createdAt']);
+        allow update: if false;
+        allow delete: if me(u);
+      }
+
+      // ---- PAYMENTS ----
+      match /payments/{p} {
+        allow read: if me(u);
+        allow create: if me(u);
+      }
+
+      // ---- BOOKMARKS ----
+      match /bookmarks/{b} {
+        allow read, write: if me(u);
+        match /{doc=**} { allow read, write: if me(u); }
+      }
+
+      // ---- RECENT ----
+      match /recent/{r} {
+        allow read, write: if me(u);
+      }
+    }
+
+    // ------------------------------------------------------------
+    // PUBLIC WEBSITES — anyone can read, only owner can write
+    // ------------------------------------------------------------
+    match /publicWebsites/{s} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ------------------------------------------------------------
+    // PLANS — public read
+    // ------------------------------------------------------------
+    match /plans/{p} {
+      allow read: if true;
+    }
+
+    // ------------------------------------------------------------
+    // EXCHANGE RATES — public read
+    // ------------------------------------------------------------
+    match /exchangeRates/{c} {
+      allow read: if true;
+    }
+
+    // ------------------------------------------------------------
+    // AUDIT LOGS — write from authenticated clients, no client read
+    // ------------------------------------------------------------
+    match /auditLogs/{a} {
+      allow create: if request.auth != null;
+      allow read: if false;
+    }
+
+    // ------------------------------------------------------------
+    // DENY EVERYTHING ELSE
+    // ------------------------------------------------------------
+    match /{x=**} {
+      allow read, write: if false;
+    }
+  }
+}
