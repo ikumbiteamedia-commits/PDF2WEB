@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{b}/o {
+
+    // ------------------------------------------------------------
+    // Conversions — server processing pipeline
+    // Path: users/{uid}/conversions/{jobId}/input.pdf  (and /output.xxx)
+    // ------------------------------------------------------------
+    match /users/{u}/conversions/{c}/{f=**} {
+      allow read: if request.auth != null && request.auth.uid == u;
+      allow read: if request.query.token is string;
+      allow write: if request.auth != null && request.auth.uid == u
+        && request.resource.size < 200 * 1024 * 1024;
+    }
+
+    // ------------------------------------------------------------
+    // Documents — original PDFs uploaded by the user
+    // Path: users/{uid}/documents/{docId}/original.pdf
+    // ------------------------------------------------------------
+    match /users/{u}/documents/{d}/{f=**} {
+      allow read: if request.auth != null && request.auth.uid == u;
+      allow read: if request.query.token is string;
+      allow write: if request.auth != null && request.auth.uid == u
+        && request.resource.contentType == 'application/pdf'
+        && request.resource.size < 500 * 1024 * 1024;
+    }
+  }
+}

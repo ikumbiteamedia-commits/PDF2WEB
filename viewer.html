@@ -29,7 +29,7 @@
 
     <div class="header-actions">
         <div class="controls">
-            <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Library</span></a>
+            <a class="btn" href="app.html" data-lib><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs" data-lib-label>Library</span></a>
         </div>
     </div>
 
@@ -56,13 +56,13 @@
 
     <!-- TOP BAR -->
     <div class="viewer-topbar">
-        <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Library</span></a>
+        <a class="btn" href="app.html" data-lib><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs" data-lib-label>Library</span></a>
 
         <b id="viewerTitle" class="viewer-title">Loading…</b>
 
         <div class="viewer-searchbar">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="viewerSearch" placeholder="Search in this PDF or jump to page…">
+            <input id="viewerSearch" placeholder="Search words, or jump to a page number…">
             <button class="btn icon-only" id="clearSearch" title="Clear" style="display:none">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -151,9 +151,16 @@
 
             <!-- PDF VIEW (default) -->
             <div id="pdfView" class="viewer-view">
-                <div class="book" id="bookFace">
-                    <p class="meta" style="padding:60px 0;text-align:center">Loading your PDF…</p>
+                <!-- Shown only while a search is active (arrived from a result) -->
+                <div class="back-results-bar hidden" id="backBar">
+                    <button class="btn primary" id="backToResults" type="button">
+                        <i class="fa-solid fa-arrow-left"></i> Back to results
+                    </button>
+                    <span class="note warn hidden" id="matchNoteWarn"></span>
+                    <span class="note ok hidden" id="matchNoteOk"></span>
                 </div>
+
+                <div class="book" id="bookFace"></div>
             </div>
 
             <!-- RESULTS VIEW (shown when searching) -->
@@ -162,6 +169,7 @@
                     <div class="results-title">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span id="resultsSummary">Searching…</span>
+                        <span class="meta" id="resultsDoc" style="margin-left:10px;font-weight:600"></span>
                     </div>
                     <button class="btn" id="backToPdfBtn"><i class="fa-solid fa-arrow-left"></i> Back to PDF</button>
                 </div>

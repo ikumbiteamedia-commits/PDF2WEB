@@ -116,18 +116,30 @@ exports.processDocument=onObjectFinalized({region:"us-east1",memory:"2GiB",timeo
 // SEARCH
 // ============================================================
 exports.searchDocs=onCall({memory:"512MiB"},async req=>{
+  // Multi-word search (AND with partial-match feedback). Words >= 2 chars, case-insensitive SUBSTRING match.
+  // Full matches first, then partial; each group sorted by page number.
   const uid=need(req),q=String(req.data.q||"").trim().toLowerCase().slice(0,100);if(!q)return{results:[]};
   const prem=await isPrem(uid),col=db.collection(`users/${uid}/documents`),out=[],num=q.match(/^(?:p(?:age)?\.?\s*)?(\d{1,6})$/);
   const docs=req.data.docId?[await col.doc(req.data.docId).get()]:(await col.where("status","==","ready").get()).docs;
+  const words=[...new Set(q.split(/\s+/).filter(w=>w.length>=2))].slice(0,10);
   for(const d of docs.filter(x=>x.exists)){const D=d.data(),toc=D.toc||[];
-    if(num){const p=+num[1];if(p>=1&&p<=D.pages)out.push({docId:d.id,docName:D.displayName,page:p,heading:"Page "+p,score:1,locked:!prem&&p>FREE_PAGES});continue}
-    const w=q.match(/[a-z0-9]{3,}/g)||[];if(!w.length)continue;
-    for(const s of(await d.ref.collection("pages").where("terms","array-contains",w[0]).limit(300).get()).docs){
-      const t=s.data().text,l=t.toLowerCase();if(!w.every(x=>l.includes(x)))continue;
-      const p=+s.id,ph=l.indexOf(q),i=ph>-1?ph:l.indexOf(w[0]),h=[...toc].reverse().find(x=>x.page<=p),hm=toc.some(x=>x.page===p&&x.title.toLowerCase().includes(q)),lk=!prem&&p>FREE_PAGES;
-      out.push({docId:d.id,docName:D.displayName,page:p,heading:h?.title||"",locked:lk,snippet:lk?null:t.slice(Math.max(0,i-70),i+q.length+90),
-        score:(hm?5:0)+(ph>-1?4:0)+Math.min(3,l.split(w[0]).length-1)*.3})}}
-  return{results:out.sort((a,b)=>b.score-a.score).slice(0,40)}});
+    if(num){const p=+num[1];if(p>=1&&p<=D.pages)out.push({docId:d.id,docName:D.displayName,page:p,heading:"Page "+p,score:1,full:true,matched:[],missing:[],total:0,locked:!prem&&p>FREE_PAGES});continue}
+    if(!words.length)continue;
+    // substring semantics need the page text itself (the 'terms' index only holds whole tokens)
+    for(const s of(await d.ref.collection("pages").limit(2000).get()).docs){
+      const t=s.data().text||"",l=t.toLowerCase();
+      const matched=words.filter(w=>l.includes(w)),missing=words.filter(w=>!l.includes(w));
+      if(!matched.length)continue;
+      const full=!missing.length,p=+s.id,ph=l.indexOf(q);
+      const first=matched.map(w=>l.indexOf(w)).sort((a,b)=>a-b)[0],i=ph>-1?ph:first;
+      const h=[...toc].reverse().find(x=>x.page<=p),lk=!prem&&p>FREE_PAGES;
+      out.push({docId:d.id,docName:D.displayName,page:p,heading:h?.title||"",locked:lk,
+        snippet:lk?null:t.slice(Math.max(0,i-70),i+(ph>-1?q.length:matched[0].length)+110),
+        full,matched,missing,total:words.length,
+        warning:full?null:`Found ${matched.length} of ${words.length} words on this page: matched ${matched.map(w=>"'"+w+"'").join(", ")}. Missing: ${missing.map(w=>"'"+w+"'").join(", ")}.`,
+        score:(ph>-1?4:0)+matched.length})}}
+  out.sort((a,b)=>(b.full-a.full)||(a.full?0:b.matched.length-a.matched.length)||(a.docName||"").localeCompare(b.docName||"")||(a.page-b.page));
+  return{results:out.slice(0,40)}});
 
 // ============================================================
 // PRICING — plans in USD + live FX rates for local currency display

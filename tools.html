@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Decision: navbar/drawer copied from app.html and wired by js/nav.js (no Firestore init clash with js/app.js). -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,55 +19,98 @@
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="css/tools.css">
 </head>
-<body class="tools-page">
+<body data-nav-standalone>
 
-<!-- ================= HEADER ================= -->
+<!-- ================= HEADER (identical to app.html) ================= -->
 <header class="app">
     <div class="logo" style="cursor:pointer;" onclick="location.href='app.html'">
         <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
         <div class="logo-text">
             <span class="brand">PDF2WEB</span>
-            <small>PDF TOOLS</small>
+            <small>A WHOLE NEW PDF EXPERIENCE</small>
         </div>
+    </div>
+
+    <div class="searchbar desktop-only" id="headerSearch">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="hSearch" placeholder="Search by keyword or page number...">
     </div>
 
     <div class="header-actions">
-        <div class="controls">
-            <a class="btn" href="app.html"><i class="fa-solid fa-arrow-left"></i> <span class="hide-xs">Dashboard</span></a>
+        <div class="controls" id="userHeaderBtns">
+            <button class="btn" data-nav="account"><i class="fa-solid fa-user"></i> <span class="hide-xs">Account</span></button>
         </div>
     </div>
+
+    <button class="iconbtn mobile-only" id="menuBtn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
 </header>
 
-<!-- ================= SHELL ================= -->
-<div class="tools-shell">
+<!-- ================= MOBILE DRAWER (identical to app.html) ================= -->
+<div class="backdrop hidden" id="backdrop"></div>
+<div class="drawer" id="drawer">
+    <div class="drawer-head">
+        <div class="drawer-brand">
+            <div class="mark"><i class="fa-solid fa-file-pdf"></i></div>
+            <b>PDF2WEB</b>
+        </div>
+        <button class="iconbtn" id="drawerClose" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-    <!-- LEFT: tools list -->
-    <aside class="tools-nav" id="toolsNav">
-        <h4><i class="fa-solid fa-toolbox"></i> PDF Tools</h4>
-        <div id="toolsNavList"></div>
+    <nav>
+        <a href="app.html" data-nav="home"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        <a href="app.html" data-nav="library"><i class="fa-solid fa-book"></i> My Library</a>
+        <a href="app.html" data-nav="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</a>
+        <a href="app.html" data-nav="search"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+        <a href="app.html" data-nav="bookmarks"><i class="fa-solid fa-bookmark"></i> Bookmarks</a>
+        <a href="app.html" data-nav="recent"><i class="fa-solid fa-clock-rotate-left"></i> Recent</a>
+        <a href="tools.html"><i class="fa-solid fa-toolbox"></i> PDF Tools</a>
+        <a href="webify.html"><i class="fa-solid fa-code"></i> Webify a PDF</a>
+        <a href="app.html" data-nav="sites"><i class="fa-solid fa-globe"></i> Webified Sites</a>
+        <a href="app.html" data-nav="admin" class="adminLink hidden"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+    </nav>
+    <div id="drawerProfile"></div>
+</div>
+
+<!-- ================= MAIN SHELL (matches app.html's .shell + .sidebar layout) ================= -->
+<div class="shell">
+    <aside class="sidebar desktop-only">
+        <nav>
+            <a href="app.html" data-nav="home"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+            <a href="app.html" data-nav="library"><i class="fa-solid fa-book"></i> My Library</a>
+            <a href="app.html" data-nav="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</a>
+            <a href="app.html" data-nav="search"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+            <a href="app.html" data-nav="bookmarks"><i class="fa-solid fa-bookmark"></i> Bookmarks</a>
+            <a href="app.html" data-nav="recent"><i class="fa-solid fa-clock-rotate-left"></i> Recent</a>
+            <a href="tools.html" class="active"><i class="fa-solid fa-toolbox"></i> PDF Tools</a>
+            <a href="webify.html"><i class="fa-solid fa-code"></i> Webify a PDF</a>
+            <a href="app.html" data-nav="sites"><i class="fa-solid fa-globe"></i> Webified Sites</a>
+            <a href="app.html" data-nav="admin" class="adminLink hidden"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+        </nav>
+        <div id="sideProfile"></div>
     </aside>
 
-    <!-- RIGHT: workspace -->
-    <main class="tools-main">
+    <main>
+        <div class="wrap">
 
-        <!-- Landing: tool grid -->
-        <section id="toolsLanding" class="tools-landing">
-            <h1>What would you like to do?</h1>
-            <p class="meta">Pick a tool. Everything runs on your device unless it's a server conversion.</p>
-            <div class="tools-grid" id="toolsGrid"></div>
-        </section>
+            <!-- Landing: tool grid -->
+            <section id="toolsLanding" class="tools-landing">
+                <h1>PDF Tools</h1>
+                <p class="meta">Pick a tool. Everything runs on your device unless it's a server conversion.</p>
+                <div class="tools-grid" id="toolsGrid"></div>
+            </section>
 
-        <!-- Workspace: dynamically rendered per tool -->
-        <section id="toolsWorkspace" class="tools-workspace hidden"></section>
+            <!-- Workspace: dynamically rendered per tool -->
+            <section id="toolsWorkspace" class="tools-workspace hidden"></section>
 
+        </div>
     </main>
-
 </div>
 
 <!-- ================= TOAST ================= -->
 <div class="toast" id="toast"></div>
 
 <script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/nav.js"></script>
 <script type="module" src="js/tools/index.js"></script>
 
 </body>

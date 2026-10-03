@@ -1,0 +1,30 @@
+[
+  {
+    "origin": [
+      "http://localhost:5500",
+      "http://localhost:5501",
+      "http://127.0.0.1:5500",
+      "http://127.0.0.1:5501",
+      "https://pdf2web-8b229.web.app",
+      "https://pdf2web-8b229.firebaseapp.com",
+      "https://pdftoweb.online",
+      "https://www.pdftoweb.online"
+    ],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range",
+      "Accept-Ranges",
+      "Authorization",
+      "Range",
+      "X-Requested-With",
+      "x-goog-resumable",
+      "x-firebase-storage-version",
+      "x-goog-upload-command",
+      "x-goog-upload-header-content-length",
+      "x-goog-upload-protocol"
+    ],
+    "maxAgeSeconds": 60
+  }
+]
